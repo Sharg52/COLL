@@ -141,29 +141,31 @@ Now your balance: {balance}
     await message.answer(text)
     await state.finish()
 
-
-#Проверка баланса
-@dp.message_handler(commands=["balance"])
-async def balance(message: types.Message):
-    balance = await db.check_balance()
-    text = f"Now your balance: {balance}"
-    await message.answer(text)
-
-
-
  #Уменьшение Денег
 @dp.message_handler(commands=["reduce"])
 async def reduce_money(message: types.Message):
-    amount_of_money = message.text.split(" ")[1]
-    amount_of_money=(int(amount_of_money))
+    await message.answer("How much do you want to reduce to your balance")
+    await Coin.Reduce.set()
+
+
+@dp.message_handler(state=Coin.Reduce)
+async  def add_func(message:Message,state: FSMContext):
+    amount_of_money = message.text
+    amount_of_money = (int(amount_of_money))
     await db.reduce_money(amount_of_money)
     balance = await db.check_balance()
-
     text = f"""
-You have been added {amount_of_money} coins.
+You reduced {amount_of_money} coins.
 Now your balance: {balance}
-    """
+ """
     await message.answer(text)
+    await state.finish()
+
+
+
+
+
+
 
 
 
@@ -195,11 +197,9 @@ async def process_help_command(message: types.Message):
     text = f"""You can:
 1)Check commands: /help
 
-2)Add money: /add SUM
-        Example: /add 100
+2)Add money: /add 
 
-3)Reduce money: /reduce SUM
-              Example: /reduce 100
+3)Reduce money: /reduce
 
 4)Check your balance: /balance
 
@@ -216,11 +216,9 @@ async def check_balance1(call: CallbackQuery):
     text = f"""You can:
 1)Check commands: /help
 
-2)Add money: /add SUM
-        Example: /add 100
+2)Add money: /add
 
-3)Reduce money: /reduce SUM
-               Example: /reduce 100
+3)Reduce money: /reduce
 
 4)Check your balance: /balance
 
@@ -232,6 +230,12 @@ async def check_balance1(call: CallbackQuery):
 """
     await call.message.edit_reply_markup()
     await call.message.reply(text=text, reply=False)
+
+@dp.message_handler(commands=["balance"])
+async def balance(message: types.Message):
+    balance = await db.check_balance()
+    text = f"Now your balance: {balance}"
+    await message.answer(text)
 
 
 #Проверка баланса ЧЕРЕЗ КНОПКУ
@@ -253,7 +257,53 @@ async def reduce_money(call:  CallbackQuery):
 
 
 
+@dp.message_handler(Button("ADD"))
+async def add_money(message: types.Message,state: FSMContext):
+    await message.answer("How much do you want to add to your balance")
+    await Coin.Add.set()
 
+
+@dp.message_handler(Button("REDUCE"))
+async def reduce_money(message: types.Message):
+    await message.answer("How much do you want to reduce to your balance")
+    await Coin.Reduce.set()
+
+
+@dp.message_handler(Button("BALANCE"))
+async def balance(message: types.Message):
+    balance = await db.check_balance()
+    text = f"Now your balance: {balance}"
+    await message.answer(text)
+
+@dp.message_handler(Button("HELP"))
+async def process_help_command(message: types.Message):
+    text = f"""You can:
+1)Check commands: /help
+
+2)Add money: /add
+
+3)Reduce money: /reduce
+
+4)Check your balance: /balance
+
+5)Zero balance: /zero
+
+6)Check referrals: /referrals
+
+7)Check my referral link /link
+"""
+    await message.reply(text=text,reply=False)
+
+
+
+@dp.message_handler()
+async def keyboard(message: Message):
+    text=f"What do you want?"
+    keyboard=ListOfButtons(
+        text=["ADD","REDUCE","BALANCE","HELP"],
+        align=[2,2]
+    ).reply_keyboard
+    await message.reply(text=text,reply_markup=keyboard,reply=False)
 
 
 
