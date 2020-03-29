@@ -1,4 +1,4 @@
-import random
+from time import sleep
 from aiogram import types
 from asyncpg import Connection, Record
 from asyncpg.exceptions import UniqueViolationError
@@ -8,6 +8,7 @@ from aiogram.types.reply_keyboard import ReplyKeyboardRemove
 from filters import *
 from aiogram.dispatcher.storage import FSMContext
 from states import Coin
+from asgiref.sync import sync_to_async
 
 class DBCommands:
     pool: Connection = db
@@ -103,7 +104,6 @@ async def register_user(message: types.Message):
     text += f"""
 Now there are {count_users} people in the database!
 Your referral link: {bot_link}
-Check commands: /help
 """
     keyboard = ListOfButtons(
         text=["Help", "Check balance", "Check referrals"],
@@ -138,7 +138,8 @@ async  def add_func(message:Message,state: FSMContext):
 You have been added {amount_of_money} coins.
 Now your balance: {balance}
     """
-    await message.answer(text)
+    keyboard =  call_keyboard()
+    await message.reply(text=text, reply_markup=keyboard, reply=False)
     await state.finish()
 
  #Уменьшение Денег
@@ -158,16 +159,16 @@ async  def add_func(message:Message,state: FSMContext):
 You reduced {amount_of_money} coins.
 Now your balance: {balance}
  """
-    await message.answer(text)
+    keyboard =  call_keyboard()
+    await message.reply(text=text, reply_markup=keyboard, reply=False)
     await state.finish()
 
-
-
-
-
-
-
-
+def call_keyboard():
+    keyboard = ListOfButtons(
+        text=["ADD", "REDUCE", "BALANCE", "HELP"],
+        align=[2, 2]
+    ).reply_keyboard
+    return  keyboard
 
 #Обнуление баланса
 @dp.message_handler(commands=["zero"])
@@ -178,7 +179,8 @@ async def reduce_money(message: types.Message):
     text = f"""
 Now your balance: {balance}
     """
-    await message.answer(text)
+    keyboard = call_keyboard()
+    await message.answer(text,reply_markup=keyboard)
 
 
 #выводит реферальную ссылку
@@ -209,7 +211,8 @@ async def process_help_command(message: types.Message):
 
 7)Check my referral link /link
 """
-    await message.reply(text=text,reply=False)
+    keyboard = call_keyboard()
+    await message.reply(text=text,reply=False,reply_markup=keyboard)
 
 @dp.callback_query_handler(Button("1"))
 async def check_balance1(call: CallbackQuery):
@@ -229,13 +232,15 @@ async def check_balance1(call: CallbackQuery):
 7)Check my referral link /link
 """
     await call.message.edit_reply_markup()
-    await call.message.reply(text=text, reply=False)
+    keyboard = call_keyboard()
+    await call.message.reply(text=text, reply=False,reply_markup=keyboard)
 
 @dp.message_handler(commands=["balance"])
 async def balance(message: types.Message):
     balance = await db.check_balance()
     text = f"Now your balance: {balance}"
-    await message.answer(text)
+    keyboard = call_keyboard()
+    await message.answer(text,reply_markup=keyboard)
 
 
 #Проверка баланса ЧЕРЕЗ КНОПКУ
@@ -259,13 +264,13 @@ async def reduce_money(call:  CallbackQuery):
 
 @dp.message_handler(Button("ADD"))
 async def add_money(message: types.Message,state: FSMContext):
-    await message.answer("How much do you want to add to your balance")
+    await message.answer("How much do you want to add to your balance",reply_markup=ReplyKeyboardRemove())
     await Coin.Add.set()
 
 
 @dp.message_handler(Button("REDUCE"))
 async def reduce_money(message: types.Message):
-    await message.answer("How much do you want to reduce to your balance")
+    await message.answer("How much do you want to reduce to your balance",reply_markup=ReplyKeyboardRemove())
     await Coin.Reduce.set()
 
 
@@ -292,7 +297,8 @@ async def process_help_command(message: types.Message):
 
 7)Check my referral link /link
 """
-    await message.reply(text=text,reply=False)
+    keyboard = call_keyboard()
+    await message.reply(text=text,reply=False,reply_markup=keyboard)
 
 
 
