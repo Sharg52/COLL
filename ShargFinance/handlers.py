@@ -6,6 +6,8 @@ from load_all import bot, dp, db
 from keyboards import ListOfButtons
 from aiogram.types.reply_keyboard import ReplyKeyboardRemove
 from filters import *
+from aiogram.dispatcher.storage import FSMContext
+from states import Coin
 
 class DBCommands:
     pool: Connection = db
@@ -121,8 +123,13 @@ async def check_referrals(message: types.Message):
 
 #добавление денег
 @dp.message_handler(commands=["add"])
-async def add_money(message: types.Message):
-    amount_of_money = message.text.split(" ")[1]
+async def add_money(message: types.Message,state: FSMContext):
+    await message.answer("How much do you want to add to your balance")
+    await Coin.Add.set()
+
+@dp.message_handler(state=Coin.Add)
+async  def add_func(message:Message,state: FSMContext):
+    amount_of_money = message.text
     amount_of_money=(int(amount_of_money))
     await db.add_money(amount_of_money)
     balance = await db.check_balance()
@@ -132,6 +139,7 @@ You have been added {amount_of_money} coins.
 Now your balance: {balance}
     """
     await message.answer(text)
+    await state.finish()
 
 
 #Проверка баланса
