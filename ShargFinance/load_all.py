@@ -4,10 +4,11 @@ import logging
 from aiogram import Bot
 from aiogram import Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-
+from aiogram.bot import api
 
 from config import TOKEN
-
+PATCHED_URL = "https://telegg.ru/orig/bot{token}/{method}"
+setattr(api, 'API_URL', PATCHED_URL)
 from sql import create_pool,create_db
 
 # from aiogram.contrib.fsm_storage.redis import RedisStorage2
