@@ -9,7 +9,7 @@ from aiogram.bot import api
 from config import TOKEN
 PATCHED_URL = "https://telegg.ru/orig/bot{token}/{method}"
 setattr(api, 'API_URL', PATCHED_URL)
-from sql import create_pool
+from sql import create_pool,create_db
 
 # from aiogram.contrib.fsm_storage.redis import RedisStorage2
 

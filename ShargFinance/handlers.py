@@ -1,4 +1,4 @@
-from time import sleep
+
 from aiogram import types
 from asyncpg import Connection, Record
 from asyncpg.exceptions import UniqueViolationError
@@ -8,7 +8,7 @@ from aiogram.types.reply_keyboard import ReplyKeyboardRemove
 from filters import *
 from aiogram.dispatcher.storage import FSMContext
 from states import Coin
-from asgiref.sync import sync_to_async
+
 
 class DBCommands:
     pool: Connection = db
@@ -118,7 +118,7 @@ Your referral link: {bot_link}
 @dp.message_handler(commands=["referrals"])
 async def check_referrals(message: types.Message):
     referrals = await db.check_referrals()
-    text = f"Your referrals:\n{referrals}"
+    text = f"Your referrals: \n{referrals}"
     await message.answer(text)
 
 #добавление денег
