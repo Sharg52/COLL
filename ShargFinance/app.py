@@ -1,7 +1,7 @@
 from aiogram import executor
 import asyncio
 from config import admin_id
-from load_all import bot,create_db
+from load_all import bot, create_db
 
 
 async def on_shutdown(dp):
