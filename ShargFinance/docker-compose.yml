@@ -27,7 +27,7 @@ services:
       context: .
     command: python app.py
     restart: always
-
+    network_mode: "host"
     env_file:
       - ".env"
 
